@@ -1236,8 +1236,39 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
   .q75q { padding: 14px; }
 }
 </style>
+<style id="v76-q">
+/* v76 · pendiente abierta con punto naranja, contador en círculo y filtros por estado */
+.q76-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #c77700; margin-right: 8px; vertical-align: 1px; flex: none; }
+.q76-cnt { width: 28px; height: 28px; border-radius: 50%; background: #a65f00; color: #fff; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.q76-cnt.ok { background: var(--lv-low); }
+.q76-cnt svg { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.q76-sd { display: inline-block; width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; margin-right: 8px; vertical-align: 1px; flex: none; border: 2px solid #6b7a8d; background: transparent; }
+.q76-sd.s-incluido { border-color: var(--bright); background: var(--bright); }
+.q76-sd.s-none { border-color: #c77700; background: #c77700; }
+.q76-sd.s-desconocido { border-color: #c77700; }
+.q76-sd.s-descartado { border-style: dashed; }
+.q76-ans { border-top: 1px solid var(--line-2); border-radius: 0; }
+.q76-ans:first-of-type { border-top: 0; }
+.q76o { padding: 14px 10px; border-top: 1px solid var(--line-2); display: flex; flex-direction: column; gap: 10px; }
+.q76o.editing { border: 1.5px solid var(--bright); border-radius: 10px; background: var(--surface-2); margin: 4px 0; }
+.q76o-q { font-size: 15px; font-weight: 600; display: flex; align-items: center; color: var(--ink); }
+.q76o-help { font-size: 13px; color: var(--muted); margin-top: -4px; }
+.q76o textarea, .q76o input[type=text], .q76o input[type=number], .q76o select { font: inherit; font-size: 16px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.q76-other > summary { cursor: pointer; color: var(--bright); font-size: 13px; font-weight: 500; min-height: 36px; display: inline-flex; align-items: center; list-style: none; }
+.q76-other > summary::-webkit-details-marker { display: none; }
+.q76-other .q75-other span { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.q75-prog { gap: 12px; }
+.q76-pf .v6-pfb { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
+.q76-pf .v6-pfb .q76-sd { margin-right: 0; }
+.q76-pfh { margin: 6px 2px 0; font-size: 12.5px; color: var(--muted); }
+.v6-pc-pills:has(.q76-cnt) { align-items: center; }
+@media (max-width: 720px) {
+  .q76-pf { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .q76-pf .v6-pfb { flex: none; min-height: 44px; white-space: nowrap; }
+}
+</style>
 <script id="v75-q-js">
-/* v75 · Preguntas fáciles en campo: cada dato es una pregunta que se responde o edita en su sitio,
+/* v75–v76 · Preguntas fáciles en campo: cada dato es una pregunta que se responde o edita en su sitio,
    las opciones se guardan con un toque y todo campo de texto tiene micrófono. */
 (function () {
   const C = window.ORA, U = window.ORA_UI, I = window.ORA_I18N;
@@ -1246,7 +1277,8 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
   const now = () => new Date().toISOString();
   const me = () => C.uname(C.S.userId);
   let QE = null;          // pregunta abierta: { k: proceso, f: campo } o { q: id de pregunta }
-  let SCROLL = false; let OPENING = null;     // llevar la pregunta abierta a la vista tras pintar
+  let SCROLL = false; let OPENING = null; let TARGET = null; // proceso al que se llegó desde un pendiente
+  const DOT = `<span class="q76-dot" aria-hidden="true"></span>`;     // llevar la pregunta abierta a la vista tras pintar
   const MORE = new Set(); // procesos con «Más contexto» abierto
   const DETAIL = new Set(); // preguntas del cuestionario en vista de evidencia y hallazgos
 
@@ -1280,6 +1312,8 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
   const actions = (save, extra) => `<div class="q75-act">${extra || ''}<span class="q75-sp"></span><button class="btn ghost sm" data-act="q75-cancel">${L('Cancelar', 'Cancel')}</button><button class="btn primary sm" data-act="${save}">${ic('check', 'sm')}${L('Guardar', 'Save')}</button></div>`;
   A['q75-cancel'] = () => { QE = null; R(); };
 
+  // círculo con el número de preguntas por responder (verde con ✓ cuando no falta ninguna)
+  U.cnt76 = n => `<span class="q76-cnt ${n ? '' : 'ok'}" role="img" aria-label="${h(n ? L(`${n} ${n === 1 ? 'pregunta' : 'preguntas'} por responder`, `${n} ${n === 1 ? 'question' : 'questions'} to answer`) : L('Obligatorias completas', 'Required answers complete'))}" title="${h(n ? L(`${n} por responder`, `${n} to answer`) : L('Completo', 'Complete'))}">${n || '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'}</span>`;
   // ---------- Alcance: preguntas de cada proceso crítico ----------
   const TYPE = () => [['productivo', L('Productivo', 'Production'), L('Genera el producto o servicio', 'Produces the product or service')], ['auxiliar', L('Servicio auxiliar', 'Auxiliary service'), L('Apoya a otros procesos', 'Supports other processes')], ['salvaguarda', L('Salvaguarda', 'Safeguard'), L('Protege personas y planta', 'Protects people and plant')]];
   const CRIT = () => [['Alta', L('Alta', 'High'), L('Detenerlo para la operación', 'Stopping it halts operations')], ['Media', L('Media', 'Medium'), L('Afecta, pero hay cómo seguir', 'It hurts, but operations go on')], ['Baja', L('Baja', 'Low'), L('Impacto menor', 'Minor impact')]];
@@ -1301,28 +1335,30 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
   const OPTF = p => ['function', 'capacityAffected'].concat(p.type === 'salvaguarda' ? [] : ['tolsrc']).concat(['constraints', 'source']);
   const shown = (f, p, v) => { const d = PF()[f]; if (d.kind === 'choice') { const o = d.opts().find(x => x[0] === v); return o ? h(o[1]) : (v ? h(tx(v)) : ''); } return v ? h(tx(String(v))) : ''; };
 
-  function editorFor(p, f) {
+  function editorFor(p, f, editing) {
     const d = PF()[f], v = d.get(p);
-    if (d.kind === 'choice') return `<div class="q75-opts" role="radiogroup" aria-label="${h(d.q)}">${d.opts().map(o => `<button role="radio" aria-checked="${v === o[0]}" class="${v === o[0] ? 'on' : ''}" data-act="q75-pset" data-k="${p.key}" data-f="${f}" data-v="${o[0]}"><b>${o[1]}</b><small>${o[2]}</small></button>`).join('')}</div><div class="q75-act"><span class="q75-sp"></span><button class="btn ghost sm" data-act="q75-cancel">${L('Cancelar', 'Cancel')}</button></div>`;
-    if (d.kind === 'time') { const t = p.tolerance || {};
+    const cancel = editing ? `<button class="btn ghost sm" data-act="q75-cancel">${L('Cancelar', 'Cancel')}</button>` : '';
+    if (d.kind === 'choice') return `<div class="q75-opts" role="radiogroup" aria-label="${h(d.q)}">${d.opts().map(o => `<button role="radio" aria-checked="${v === o[0]}" class="${v === o[0] ? 'on' : ''}" data-act="q75-pset" data-k="${p.key}" data-f="${f}" data-v="${o[0]}"><b>${o[1]}</b><small>${o[2]}</small></button>`).join('')}</div>${cancel ? `<div class="q75-act"><span class="q75-sp"></span>${cancel}</div>` : ''}`;
+    if (d.kind === 'time') { const t = p.tolerance || {}; const tv = 'q76-tv-' + p.key, tu = 'q76-tu-' + p.key;
       return `<div class="q75-chips" role="radiogroup" aria-label="${h(d.q)}">${TOL.map(o => { const on = +t.value === o[0] && t.unit === o[1]; return `<button role="radio" aria-checked="${on}" class="${on ? 'on' : ''}" data-act="q75-tol" data-k="${p.key}" data-v="${o[0]}" data-u="${o[1]}">${o[2]}</button>`; }).join('')}</div>
-        <div class="q75-other"><label for="q75-tv">${L('Otro valor', 'Other value')}</label><span><input id="q75-tv" type="number" min="0" inputmode="decimal" value="${t.value != null && !TOL.some(o => +t.value === o[0] && t.unit === o[1]) ? h(String(t.value)) : ''}" placeholder="12"><select id="q75-tu" aria-label="${L('Unidad', 'Unit')}">${[['h', L('horas', 'hours')], ['min', L('minutos', 'minutes')], ['días', L('días', 'days')]].map(o => U.opt(o[0], o[1], t.unit || 'h')).join('')}</select></span></div>
-        ${actions('q75-tolsave').replace('data-act="q75-tolsave"', `data-act="q75-tolsave" data-k="${p.key}"`)}`; }
-    const id = 'q75-in';
-    const fld = d.kind === 'long' ? `<textarea id="${id}" rows="3" placeholder="${h(d.ph || L('Escriba o dicte la respuesta', 'Type or dictate the answer'))}">${h(tx(v || ''))}</textarea>` : `<input id="${id}" type="text" value="${h(tx(v || ''))}" placeholder="${h(d.ph || L('Escriba o dicte la respuesta', 'Type or dictate the answer'))}" enterkeyhint="done">`;
-    return `<span class="q75-mw ${d.kind === 'long' ? 'ta' : ''}">${fld}${U.mic75(id)}</span>${actions('q75-psave').replace('data-act="q75-psave"', `data-act="q75-psave" data-k="${p.key}" data-f="${f}"`)}`;
+        <details class="q76-other" ${t.value != null && t.value !== '' && !TOL.some(o => +t.value === o[0] && t.unit === o[1]) ? 'open' : ''}><summary>${L('Otro valor', 'Other value')}</summary><div class="q75-other"><span><input id="${tv}" type="number" min="0" inputmode="decimal" aria-label="${L('Valor', 'Value')}" value="${t.value != null && !TOL.some(o => +t.value === o[0] && t.unit === o[1]) ? h(String(t.value)) : ''}" placeholder="12"><select id="${tu}" aria-label="${L('Unidad', 'Unit')}">${[['h', L('horas', 'hours')], ['min', L('minutos', 'minutes')], ['días', L('días', 'days')]].map(o => U.opt(o[0], o[1], t.unit || 'h')).join('')}</select><button class="btn primary sm" data-act="q75-tolsave" data-k="${p.key}">${ic('check', 'sm')}${L('Guardar', 'Save')}</button></span></div></details>
+        ${cancel ? `<div class="q75-act"><span class="q75-sp"></span>${cancel}</div>` : ''}`; }
+    const id = `q76-in-${p.key}-${f}`;
+    const fld = d.kind === 'long' ? `<textarea id="${id}" rows="${editing ? 3 : 2}" placeholder="${h(d.ph || L('Escriba o toque el micrófono', 'Type or tap the microphone'))}">${h(tx(v || ''))}</textarea>` : `<input id="${id}" type="text" value="${h(tx(v || ''))}" placeholder="${h(d.ph || L('Escriba o toque el micrófono', 'Type or tap the microphone'))}" enterkeyhint="done">`;
+    return `<span class="q75-mw ${d.kind === 'long' ? 'ta' : ''}">${fld}${U.mic75(id)}</span><div class="q75-act"><span class="q75-sp"></span>${cancel}<button class="btn primary sm" data-act="q75-psave" data-k="${p.key}" data-f="${f}" data-for="${id}">${ic('check', 'sm')}${L('Guardar', 'Save')}</button></div>`;
   }
   function procBody(a, p) {
     const pf = PF(), req = REQ(p), opt = OPTF(p);
     const done = req.filter(f => String(pf[f].get(p) || '').trim()).length, od = opt.filter(f => String(pf[f].get(p) || '').trim()).length;
-    const mk = (f, isReq) => { const v = pf[f].get(p); const open = QE && QE.k === p.key && QE.f === f;
-      return row({ id: `q75-${p.key}-${f}`, open, miss: isReq && !String(v || '').trim(), q: h(pf[f].q), qPlain: pf[f].q, help: open && pf[f].help ? h(pf[f].help) : '', val: shown(f, p, v), act: 'q75-popen', data: `data-k="${p.key}" data-f="${f}"`, editor: open ? editorFor(p, f) : '' }); };
+    const mk = (f, isReq) => { const v = pf[f].get(p); const has = !!String(v || '').trim(); const editing = !!(QE && QE.k === p.key && QE.f === f);
+      if (has && !editing) return `<button class="q75r-h q76-ans" id="q75-${p.key}-${f}" data-act="q75-popen" data-k="${p.key}" data-f="${f}" aria-label="${h(L('Editar: ', 'Edit: ') + pf[f].q)}"><span class="q75r-t"><span class="q75r-q">${h(pf[f].q)}</span><span class="q75r-v">${shown(f, p, v)}</span></span><span class="q75r-e">${L('Editar', 'Edit')}</span></button>`;
+      return `<div class="q76o ${has ? 'editing' : 'pend'}" id="q75-${p.key}-${f}"><div class="q76o-q">${!has && isReq ? DOT : ''}<span>${h(pf[f].q)}</span></div>${pf[f].help ? `<div class="q76o-help">${h(pf[f].help)}</div>` : ''}${editorFor(p, f, editing)}</div>`; };
     const ST = [['incluido', L('Se evalúa', 'Assessed')], ['na', L('No aplica', 'Not applicable')], ['fuera', L('Fuera del alcance', 'Out of scope')], ['desconocido', L('No se sabe', 'Unknown')]];
     const moreOpen = MORE.has(p.key) || (QE && QE.k === p.key && opt.includes(QE.f));
     return `<div class="q75">
       <div class="q75-top"><div class="q75-dec" role="radiogroup" aria-label="${L('Decisión sobre el proceso', 'Decision on the process')}">${ST.map(s => `<button role="radio" aria-checked="${p.status === s[0]}" class="${p.status === s[0] ? 'on' : ''}" data-act="proc-status" data-k="${p.key}" data-v="${s[0]}">${s[1]}</button>`).join('')}</div>
-        <div class="q75-prog"><span class="q75-bar"><i style="width:${Math.round(done / req.length * 100)}%" class="${done === req.length ? 'ok' : ''}"></i></span><small>${done === req.length ? L('Obligatorias completas', 'Required answers complete') : L(`${done} de ${req.length} obligatorias respondidas`, `${done} of ${req.length} required answered`)}</small></div></div>
-      <div class="q75-gh">${L('Obligatorias', 'Required')}</div>
+        <div class="q75-prog"><span class="q75-bar"><i style="width:${Math.round(done / req.length * 100)}%" class="${done === req.length ? 'ok' : ''}"></i></span>${U.cnt76(req.length - done)}</div></div>
+
       ${req.map(f => mk(f, true)).join('')}
       ${p.type === 'salvaguarda' ? `<p class="q75-note">${L('Salvaguarda: protege personas y planta; la tolerancia no aplica.', 'Safeguard: protects people and plant; tolerance does not apply.')}</p>` : ''}
       <button class="q75-more" data-act="q75-more" data-k="${p.key}" aria-expanded="${moreOpen}"><span><b>${L('Más contexto, opcional', 'More context, optional')}</b><small>${L(`${od} de ${opt.length} respondidas. Sirven para el informe y no bloquean el avance.`, `${od} of ${opt.length} answered. They feed the report and do not block progress.`)}</small></span><em>${moreOpen ? L('Ocultar', 'Hide') : L('Mostrar', 'Show')}</em></button>
@@ -1342,11 +1378,11 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
   }
   const lbls = f => [{ just: 'justificación', crit: 'criticidad', type: 'tipo de proceso', interruption: 'consecuencia de una interrupción', tol: 'tolerancia', function: 'función', capacityAffected: 'capacidad afectada', tolsrc: 'fuente de la tolerancia', constraints: 'restricciones', source: 'fuente' }[f], { just: 'justification', crit: 'criticality', type: 'process type', interruption: 'consequence of an interruption', tol: 'tolerance', function: 'function', capacityAffected: 'capacity affected', tolsrc: 'tolerance source', constraints: 'constraints', source: 'source' }[f]];
   A['q75-pset'] = el => { const p = procOf(el.dataset.k); if (!p) return; const [e, n] = lbls(el.dataset.f); setP(p, el.dataset.f, el.dataset.v, e, n); };
-  A['q75-psave'] = el => { const p = procOf(el.dataset.k); const f = el.dataset.f; const i = document.getElementById('q75-in'); if (!p || !i) return; const v = i.value.trim();
+  A['q75-psave'] = el => { const p = procOf(el.dataset.k); const f = el.dataset.f; const i = document.getElementById(el.dataset.for); if (!p || !i) return; const v = i.value.trim();
     if (!v && REQ(p).includes(f)) { i.focus(); return U.toast(L('Escriba o dicte la respuesta', 'Type or dictate the answer')); } const [e, n] = lbls(f); setP(p, f, v, e, n); };
   const setTol = (p, value, unit) => { const t = p.tolerance || {}; p.tolerance = Object.assign({}, t, { value, unit, conf: t.conf || 'Declarado' }); const [e, n] = lbls('tol'); setP(p, null, null, e, n); };
   A['q75-tol'] = el => { const p = procOf(el.dataset.k); if (!p) return; setTol(p, +el.dataset.v, el.dataset.u); };
-  A['q75-tolsave'] = el => { const p = procOf(el.dataset.k); const v = (document.getElementById('q75-tv') || {}).value; if (!p) return; if (v === '' || isNaN(+v)) { const i = document.getElementById('q75-tv'); if (i) i.focus(); return U.toast(L('Elija un tiempo o escriba otro valor', 'Pick a time or type another value')); } setTol(p, +v, (document.getElementById('q75-tu') || {}).value || 'h'); };
+  A['q75-tolsave'] = el => { const p = procOf(el.dataset.k); if (!p) return; const v = (document.getElementById('q76-tv-' + p.key) || {}).value; if (v === '' || isNaN(+v)) { const i = document.getElementById('q76-tv-' + p.key); if (i) i.focus(); return U.toast(L('Elija un tiempo o escriba otro valor', 'Pick a time or type another value')); } setTol(p, +v, (document.getElementById('q76-tu-' + p.key) || {}).value || 'h'); };
 
   // ---------- Cuestionario: responder con un toque ----------
   const VALS = () => [['Sí', L('Sí', 'Yes'), 'si'], ['No', L('No', 'No'), 'no'], ['Desconocido', L('No se sabe', 'Unknown'), 'unk'], ['No aplica', L('No aplica', 'N/A'), 'na']];
@@ -1363,7 +1399,7 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
         <div class="q75-conf" role="radiogroup" aria-label="${L('Confianza', 'Confidence')}">${[['Estimado', L('Estimado', 'Estimated')], ['Verificado', L('Verificado', 'Verified')]].map(o => `<button role="radio" aria-checked="${(r.conf || 'Estimado') === o[0]}" class="${(r.conf || 'Estimado') === o[0] ? 'on' : ''}" data-act="q75-qconf" data-q="${q.id}" data-v="${o[0]}">${o[1]}</button>`).join('')}</div>
         ${actions('q75-qsave').replace('data-act="q75-qsave"', `data-act="q75-qsave" data-q="${q.id}"`)}</div>` : '';
     return `<article class="q75q ${ok ? 'ok' : ''} ${x.cond ? 'cond' : ''}" id="q-${q.id}">
-      <div class="q75q-h"><span class="q75q-t"><b>${h(tx(q.text))}</b><small><code>${q.id}</code>${meta ? ' · ' + h(meta) : ''}${x.cond ? ` · ${ic('branch', 'sm')}${h(x.why || L('Condicional', 'Conditional'))}` : ''}</small></span>${disBtn || ''}</div>
+      <div class="q75q-h"><span class="q75q-t"><b>${!r.value || needNote ? DOT : ''}${h(tx(q.text))}</b><small><code>${q.id}</code>${meta ? ' · ' + h(meta) : ''}${x.cond ? ` · ${ic('branch', 'sm')}${h(x.why || L('Condicional', 'Conditional'))}` : ''}</small></span>${disBtn || ''}</div>
       <div class="q75-ans" role="radiogroup" aria-label="${L('Respuesta', 'Answer')}">${VALS().map(v => `<button role="radio" aria-checked="${r.value === v[0]}" class="${v[2]} ${r.value === v[0] ? 'on' : ''}" data-act="q75-qans" data-q="${q.id}" data-v="${v[0]}">${v[1]}</button>`).join('')}</div>
       ${open ? noteEd : r.value ? `<div class="q75q-f">${(r.note || '').trim() ? `<button class="q75q-note" data-act="q75-qopen" data-q="${q.id}"><span>${h(tx(r.note))}</span><em>${L('Editar', 'Edit')}</em></button>` : `<button class="plink ${needNote ? 'warnl' : ''}" data-act="q75-qopen" data-q="${q.id}">${ic(needNote ? 'flag' : 'edit', 'sm')}${needNote ? L('Falta explicar por qué no aplica', 'Explain why it does not apply') : L('Agregar nota', 'Add a note')}</button>`}
         <button class="plink" data-act="q75-qdetail" data-q="${q.id}">${ic('camera', 'sm')}${L('Fotos y hallazgos', 'Photos & findings')}${nph + nf ? ` <b>${nph + nf}</b>` : ''}</button></div>` : ''}</article>`;
@@ -1391,11 +1427,25 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
   A['q75-qsimple'] = el => { const id = el.dataset.q; DETAIL.delete(id); R(); };
   const tg0 = A['v6qa-tg']; if (tg0) A['v6qa-tg'] = el => { const id = el.dataset.q; if (DETAIL.has(id) && document.querySelector(`#q-${CSS.escape(id)}.open`)) { DETAIL.delete(id); } return tg0(el); };
 
+  // ---------- filtros de procesos: nombre claro, punto de color y estado propio ----------
+  const PFL = () => ({ incluido: [L('Se evalúan', 'Assessed'), L('Entran en la evaluación. El círculo naranja dice cuántas preguntas faltan.', 'They are part of the assessment. The orange circle shows how many questions are left.')],
+    none: [L('Por decidir', 'To decide'), L('Sugeridos por el catálogo: decida si se evalúan.', 'Suggested by the catalog: decide whether they are assessed.')],
+    desconocido: [L('No se sabe', 'Unknown'), L('Hay que confirmar en planta si existen o aplican.', 'Confirm on site whether they exist or apply.')],
+    na: [L('No aplican', 'Not applicable'), L('No existen en esta instalación. Cada uno tiene su motivo.', 'They do not exist at this facility. Each one has its reason.')],
+    fuera: [L('Fuera del alcance', 'Out of scope'), L('Existen, pero se acordó no evaluarlos.', 'They exist, but it was agreed not to assess them.')],
+    descartado: [L('Descartados', 'Discarded'), L('Sugerencias que se quitaron de la lista.', 'Suggestions removed from the list.')],
+    all: [L('Todos', 'All'), L('Todos los procesos de esta instalación.', 'All processes at this facility.')] });
+  // el filtro de procesos y el de «Pendientes» compartían C.S.ui.pf: cada uno guarda ahora su propio valor
+  if (C.S.ui.procF == null) C.S.ui.procF = ['incluido', 'fuera', 'na', 'desconocido', 'none', 'descartado', 'all'].includes(C.S.ui.pf) ? C.S.ui.pf : 'incluido';
+  if (C.S.ui.pendF == null) C.S.ui.pendF = ['all', 'stage', 'photo'].includes(C.S.ui.pf) ? C.S.ui.pf : 'all';
+  A['v6-pf'] = el => { C.S.ui.procF = el.dataset.v; C.S.ui.pf = el.dataset.v; C.save(); R(); };
+  A.pf = el => { C.S.ui.pendF = el.dataset.f; if (U.modal) U.renderModal(); else R(); };
+  const rail0 = U.rail; if (rail0) U.rail = function () { const keep = C.S.ui.pf; C.S.ui.pf = C.S.ui.pendF || 'all'; try { return rail0.apply(this, arguments); } finally { C.S.ui.pf = keep; } };
   // ---------- ir a un pendiente abre la pregunta que falta ----------
   const goTo0 = U.goTo;
   U.goTo = function (stage, target) {
     const m = /^proc-(.+)$/.exec(target || ''); const a = C.cur();
-    if (m && a) { const p = a.processes.find(x => x.key === m[1]); if (p && p.status === 'incluido') { const miss = REQ(p).find(f => !String(PF()[f].get(p) || '').trim()); if (miss) { QE = { k: p.key, f: miss }; SCROLL = true; } } }
+    if (m && a) { const p = a.processes.find(x => x.key === m[1]); if (p && p.status === 'incluido') { const miss = REQ(p).find(f => !String(PF()[f].get(p) || '').trim()); if (miss) { TARGET = p.key; SCROLL = true; } } }
     if (stage === 4 && /^q-/.test(target || '')) { const id = target.slice(2); DETAIL.delete(id); const r = (a.answers[id] || {}); if (r.value === 'No aplica' && !(r.note || '').trim()) { QE = { q: id }; SCROLL = true; } }
     return goTo0.apply(this, arguments);
   };
@@ -1407,17 +1457,28 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
       const k = art.id.replace(/^proc-/, ''); const p = a.processes.find(x => x.key === k);
       if (!p || p.discarded || p.status !== 'incluido') return;
       let b = art.querySelector('.v6-pc-b');
-      if (!b && QE && QE.k === k && OPENING !== k && A['v6pc-tg']) { OPENING = k; setTimeout(() => { A['v6pc-tg']({ dataset: { k } }); setTimeout(() => { OPENING = null; }, 50); }, 0); return; }
+      if (!b && ((QE && QE.k === k) || TARGET === k) && OPENING !== k && A['v6pc-tg']) { OPENING = k; setTimeout(() => { A['v6pc-tg']({ dataset: { k } }); setTimeout(() => { OPENING = null; }, 50); }, 0); return; }
+      const miss = REQ(p).filter(f => !String(PF()[f].get(p) || '').trim()).length;
+      const pills = art.querySelector('.v6-pc-pills'); if (pills && !pills.dataset.q76) { pills.innerHTML = U.cnt76(miss); pills.dataset.q76 = 1; }
       if (!b || b.dataset.q75 === String(C.S.savedAt) + JSON.stringify(QE) + MORE.has(k)) return;
       b.innerHTML = procBody(a, p); b.dataset.q75 = String(C.S.savedAt) + JSON.stringify(QE) + MORE.has(k); art.classList.add('q75-pc');
     });
+    if (a) document.querySelectorAll('#main article.v6-pc').forEach(art => { const t = art.querySelector('.v6-pc-t b'); if (!t || t.querySelector('.q76-sd')) return; const k = art.id.replace(/^proc-/, ''); const p = a.processes.find(x => x.key === k); if (!p) return;
+      t.insertAdjacentHTML('afterbegin', `<span class="q76-sd s-${p.discarded ? 'descartado' : p.status || 'none'}" aria-hidden="true"></span>`); });
+    const bar = document.querySelector('#main .v6-pf[role=group]');
+    if (bar && bar.querySelector('[data-act="v6-pf"]') && !bar.dataset.q76) {
+      bar.dataset.q76 = 1; bar.classList.add('q76-pf'); const FL = PFL();
+      bar.querySelectorAll('[data-act="v6-pf"]').forEach(btn => { const k = btn.dataset.v, n = (btn.querySelector('b') || {}).textContent || ''; btn.innerHTML = `${k !== 'all' ? `<span class="q76-sd s-${k}" aria-hidden="true"></span>` : ''}<span>${FL[k] ? FL[k][0] : btn.textContent}</span><b>${n}</b>`; });
+      const cur = C.S.ui.procF || 'incluido'; if (PFL()[cur]) bar.insertAdjacentHTML('afterend', `<p class="q76-pfh">${PFL()[cur][1]}</p>`);
+    }
     micify();
-    if (SCROLL) { const el = document.querySelector('.q75r.open, .q75q .q75r-ed'); if (el) { SCROLL = false; const box = el.closest('.q75r, .q75q'); box.scrollIntoView({ block: 'center', behavior: 'smooth' }); const f = box.querySelector('textarea, input[type=text]'); if (f && innerWidth > 720) setTimeout(() => f.focus({ preventScroll: true }), 250); } }
+    if (SCROLL && TARGET) { const el = document.querySelector(`#proc-${CSS.escape(TARGET)} .q76o.pend`); if (el) { SCROLL = false; TARGET = null; el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }
+    if (SCROLL) { const el = document.querySelector('.q76o.editing, .q75q .q75r-ed'); if (el) { SCROLL = false; const box = el.closest('.q76o, .q75q'); box.scrollIntoView({ block: 'center', behavior: 'smooth' }); const f = box.querySelector('textarea, input[type=text]'); if (f && innerWidth > 720) setTimeout(() => f.focus({ preventScroll: true }), 250); } }
   }
-  const r0 = U.render; U.render = function () { const out = r0.apply(this, arguments); try { enhance(); } catch (e) { console.error(e); } return out; };
+  const r0 = U.render; U.render = function () { C.S.ui.pf = C.S.ui.procF || 'incluido'; const out = r0.apply(this, arguments); try { enhance(); } catch (e) { console.error(e); } return out; };
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; try { enhance(); } catch (e) {} }); }).observe(document.body, { childList: true, subtree: true });
   // Enter guarda en las respuestas de una línea
-  document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'q75-in' && e.target.tagName === 'INPUT') { e.preventDefault(); const b = e.target.closest('.q75r-ed').querySelector('[data-act="q75-psave"]'); if (b) b.click(); } if (e.key === 'Escape' && QE) { QE = null; R(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && /^q76-in-/.test(e.target.id) && e.target.tagName === 'INPUT') { e.preventDefault(); const b = document.querySelector(`[data-act="q75-psave"][data-for="${e.target.id}"]`); if (b) b.click(); } if (e.key === 'Escape' && QE) { QE = null; R(); } });
 })();
 </script>
 </body>
