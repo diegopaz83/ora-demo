@@ -900,6 +900,7 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
 <script src="app/demo-v6.js?v=70"></script>
 <script src="app/v6-data.js?v=70"></script>
 <script src="app/core.js?v=70"></script>
+<script>/* Siempre arranca en la pantalla de perfiles: se conservan los datos, no la sesión */ if (window.ORA && ORA.S) { ORA.S.userId = null; ORA.S.ui.view = 'login'; ORA.S.activeId = null; }</script>
 <script src="app/ui.js?v=70"></script>
 <script src="app/views-v2.js?v=70"></script>
 <script src="app/pdf-v2.js?v=70"></script>
@@ -1479,6 +1480,31 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
   let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; try { enhance(); } catch (e) {} }); }).observe(document.body, { childList: true, subtree: true });
   // Enter guarda en las respuestas de una línea
   document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && /^q76-in-/.test(e.target.id) && e.target.tagName === 'INPUT') { e.preventDefault(); const b = document.querySelector(`[data-act="q75-psave"][data-for="${e.target.id}"]`); if (b) b.click(); } if (e.key === 'Escape' && QE) { QE = null; R(); } });
+})();
+</script>
+<style id="lab-link-css">
+/* Botón hacia Omnicon Lab en la pantalla de perfiles */
+.lab-link { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 10px; border-radius: 999px; border: 1px solid rgba(0,220,250,.45); background: rgba(0,28,63,.55); color: #fff; font: 500 13px/1.2 'Poppins', 'Segoe UI', system-ui, sans-serif; text-decoration: none; white-space: nowrap; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: border-color .2s, background-color .2s; }
+.lab-link:hover { border-color: #00dcfa; background: rgba(0,40,90,.85); color: #fff; }
+.lab-link:focus-visible { outline: 2px solid #00dcfa; outline-offset: 2px; }
+.lab-link svg { width: 16px; height: 16px; flex: none; }
+.landing .brand > .row .lab-link { margin-left: auto; margin-right: 8px; }
+@media (max-width: 420px) { .landing .brand > .row { flex-wrap: nowrap; gap: 0; } .landing .brand > .row .lab-link { padding: 6px 10px 6px 8px; font-size: 12px; gap: 6px; margin-right: 6px; } .landing .brand > .row .lab-link .lab-pre { display: none; } }
+</style>
+<script id="lab-link-js">
+(function () {
+  'use strict';
+  var I = window.ORA_I18N, app = document.getElementById('app'); if (!I || !app) return;
+  var ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.6" fill="#00dcfa"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="2.75" fill="none" stroke="#00dcfa" stroke-width="1.5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="2.75" fill="none" stroke="#00dcfa" stroke-width="1.5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.6" fill="#00dcfa"/></svg>';
+  function add() {
+    var row = app.querySelector('.landing .brand > .row'); if (!row || row.querySelector('.lab-link')) return;
+    var a = document.createElement('a');
+    a.className = 'lab-link'; a.href = 'https://diegopaz83.github.io/omnicon-lab/'; a.target = '_blank'; a.rel = 'noopener';
+    a.title = I.L('Ver todos los productos de Omnicon', 'See all Omnicon products');
+    a.innerHTML = ICON + '<span><span class="lab-pre">' + I.L('Ir a ', 'Go to ') + '</span>Omnicon Lab</span>';
+    var lang = row.querySelector('.seg.lang'); row.insertBefore(a, lang || null);
+  }
+  new MutationObserver(add).observe(app, { childList: true, subtree: true }); add();
 })();
 </script>
 <style id="side-rail-css">
