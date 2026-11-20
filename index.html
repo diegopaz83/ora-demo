@@ -925,7 +925,123 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
 <script src="app/v6-evt.js?v=70"></script>
 <script src="app/v6-ai.js?v=70"></script>
 <script src="app/v7-nav.js?v=71"></script>
-<script src="app/v7-sum.js?v=70"></script>
+<script id="v74-sum-js">
+/* v74 · reemplaza app/v7-sum.js (v70) */
+/* ORA v7 — Resumen del assessment: siguiente paso, etapas, calidad del dato y lo que más importa. */
+(function () {
+  const C = window.ORA, U = window.ORA_UI, I = window.ORA_I18N;
+  const h = C.esc, L = I.L, tx = I.tx, ic = U.ic, A = U.act;
+  const pl = (n, s, p) => n + ' ' + (n === 1 ? s : p);
+
+  // calidad del dato: Propuesto / Aceptado / Verificado sobre el inventario vigente (+ propuestas de omnIA pendientes)
+  U.dataQuality = function (a) {
+    const c = { prop: 0, acc: 0, ver: 0 };
+    [['area', a.areas], ['system', a.systems], ['asset', a.assets], ['dep', a.deps]].forEach(([k, l]) => (l || []).forEach(x => {
+      const m = C.mat(a, k, x); if (m === 'descartado') return;
+      if (m === 'sugerido') c.prop++; else if (m === 'aceptado') c.acc++; else c.ver++; }));
+    c.prop += U.propCount ? U.propCount(a) : 0;
+    c.tot = c.prop + c.acc + c.ver; c.okPct = c.tot ? Math.round((c.acc + c.ver) / c.tot * 100) : 0; c.verPct = c.tot ? Math.round(c.ver / c.tot * 100) : 0;
+    return c;
+  };
+  U.dqBar = function (c, big) {
+    const seg = (k, n, l) => n ? `<i class="dq-${k}" style="flex:${n}" title="${l}: ${n}"></i>` : '';
+    return `<div class="v7-dq ${big ? 'big' : ''}"><div class="v7-dqb">${c.tot ? seg('prop', c.prop, L('Propuesto', 'Proposed')) + seg('acc', c.acc, L('Aceptado', 'Accepted')) + seg('ver', c.ver, L('Verificado', 'Verified')) : '<i class="dq-none" style="flex:1"></i>'}</div>
+      <div class="v7-dql"><span><i class="dq-prop"></i>${L('Propuesto', 'Proposed')} <b>${c.prop}</b></span><span><i class="dq-acc"></i>${L('Aceptado', 'Accepted')} <b>${c.acc}</b></span><span><i class="dq-ver"></i>${L('Verificado', 'Verified')} <b>${c.ver}</b></span></div></div>`;
+  };
+
+  function nextStep(a, ev) {
+    const secs = U.SECS();
+    const withProps = secs.map(s => ({ s, n: U.propCount ? U.propCount(a, s.k) : 0 })).filter(x => x.n).sort((x, y) => y.n - x.n);
+    if (withProps.length) { const x = withProps[0]; return { k: L('Propuestas de omnIA', 'omnIA proposals'), t: L(`${x.s.name} tiene ${pl(x.n, 'propuesta', 'propuestas')} por revisar`, `${x.s.name} has ${pl(x.n, 'proposal', 'proposals')} to review`), d: L('Acéptalas, edítalas o recházalas: nada entra al análisis sin tu decisión.', 'Accept, edit or reject them: nothing enters the analysis without your decision.'), btn: `<button class="btn primary" data-act="v7-sec" data-sec="${x.s.k}">${L('Revisar', 'Review')}${ic('chev', 'sm')}</button>`, ai: true }; }
+    if (U.ingestCTA && !(a.sources || []).length && !(a.props || []).length && !a.areas.length) return { k: L('Empieza aquí', 'Start here'), t: L('Dale a omnIA tus entrevistas, notas y documentos', 'Give omnIA your interviews, notes and documents'), d: L('Prepara un primer borrador del assessment con la fuente de cada dato. Tú decides qué entra.', 'It drafts the assessment with the source of every data point. You decide what goes in.'), btn: `<button class="btn primary" data-act="ing-open">${ic('spark', 'sm')}${L('Iniciar con omnIA', 'Start with omnIA')}</button>`, ai: true };
+    const st = ev.stages.find(s => s.items.some(i => i.sev !== 'sug'));
+    if (st) { const nx = st.items.filter(i => i.sev !== 'sug').sort((x, y) => C.SEV_ORDER[x.sev] - C.SEV_ORDER[y.sev])[0]; const s = secs.find(x => x.st.includes(st.n));
+      return { k: s ? s.n + '. ' + s.name : st.name, t: nx.title, d: nx.reason, btn: `<button class="btn primary" data-act="go" data-stage="${st.n}" data-target="${h(nx.target || '')}">${L('Ir', 'Go')}${ic('chev', 'sm')}</button>` }; }
+    return { k: L('Todo al día', 'All up to date'), t: L('El assessment está listo para presentar resultados', 'The assessment is ready to present results'), d: L('Revisa el tablero y genera el informe para el cliente.', 'Review the dashboard and generate the client report.'), btn: `<button class="btn primary" data-act="v7-sec" data-sec="res">${ic('radar', 'sm')}${L('Ver resultados', 'See results')}</button>` };
+  }
+
+  // Resumen v74: ¿cómo vamos? · ¿qué hago ahora? · ¿qué hemos encontrado? — cada dato aparece una sola vez
+  const missTxt = r => { const m = /^(Falta: |Missing: )(.*)$/.exec(r || ''); return m ? L('Falta completar: ', 'Still missing: ') + m[2].toLowerCase() : (r || ''); };
+  const FLV = { proceso: ['Proceso', 'Process'], activo: ['Activo', 'Asset'], sistema: ['Sistema', 'System'], dependencia: ['Dependencia', 'Dependency'], area: ['Área', 'Area'] };
+  U.views.summary = function (a, ev) {
+    const secs = U.SECS(); const ns = nextStep(a, ev); const dq = U.dataQuality(a);
+    const sst = secs.map(s => ({ s, ss: U.secState(ev, s), np: U.propCount ? U.propCount(a, s.k) : 0 }));
+    const pendTot = sst.reduce((n, x) => n + x.ss.pend, 0);
+    // 1 · avance: una sola barra dividida en las seis etapas
+    const segs = sst.map(({ s, ss }) => `<button class="v7s-seg st-${ss.state}" data-n="${s.n}" data-act="v7-sec" data-sec="${s.k}" aria-label="${h(s.n + '. ' + s.name + ': ' + (ss.state === 'complete' ? L('completa', 'complete') : ss.pct ? ss.pct + ' %' : L('sin iniciar', 'not started')))}">
+        <span class="v7s-bar"><i style="width:${ss.pct}%"></i></span><b>${s.n}. ${h(s.name)}</b><small>${ss.state === 'complete' ? L('Completa', 'Complete') : ss.pct ? ss.pct + ' % · ' + L('en curso', 'in progress') : L('Sin iniciar', 'Not started')}</small></button>`).join('');
+    const ids = [a.leadId, ...(a.team || []).filter(x => x !== a.leadId)].filter(Boolean);
+    const prog = `<section class="v7s-prog" aria-labelledby="v7s-t"><div class="v7s-ph"><div class="v7s-pt"><span class="v7s-code">${h(a.code)} · ${h(C.modName(C.mod(a)))}</span><h1 id="v7s-t">${h(tx(a.cfg.plant) || L('Nuevo assessment', 'New assessment'))}</h1><p>${h(tx(a.cfg.client) || L('Cliente por definir', 'Client to be defined'))}</p></div>
+        <div class="v7s-pn"><b>${ev.pct} %</b><small>${L(`${ev.done} de ${ev.total} criterios completos`, `${ev.done} of ${ev.total} criteria complete`)}</small></div></div>
+      <div class="v7s-segs">${segs}</div>
+      <div class="v7s-pf"><button class="v7s-team" data-act="nav" data-view="team">${U.stack(ids)}<span>${L('Equipo e historial', 'Team & history')}</span></button></div></section>`;
+    // 2 · siguiente paso + hasta dos pendientes más
+    let used = null; const st0 = ev.stages.find(s => s.items.some(i => i.sev !== 'sug'));
+    if (!ns.ai && st0) used = st0.items.filter(i => i.sev !== 'sug').sort((x, y) => C.SEV_ORDER[x.sev] - C.SEV_ORDER[y.sev])[0];
+    const more = [];
+    sst.filter(x => x.np).sort((x, y) => y.np - x.np).forEach(({ s, np }) => { if (!(ns.ai && ns.t.indexOf(s.name) === 0)) more.push({ ai: true, t: L(`Revisa ${pl(np, 'propuesta', 'propuestas')} de omnIA`, `Review ${pl(np, 'omnIA proposal', 'omnIA proposals')}`), d: s.name, btn: `<button class="btn ghost sm" data-act="v7-sec" data-sec="${s.k}">${L('Revisar', 'Review')}</button>` }); });
+    ev.stages.forEach(st => { const s = secs.find(x => x.st.includes(st.n)); st.items.filter(i => i.sev !== 'sug' && i !== used).sort((x, y) => C.SEV_ORDER[x.sev] - C.SEV_ORDER[y.sev]).slice(0, 1).forEach(i => more.push({ t: i.title, d: (s ? s.n + '. ' + s.name : st.name) + (i.reason ? ' · ' + missTxt(i.reason) : ''), btn: `<button class="btn ghost sm" data-act="go" data-stage="${st.n}" data-target="${h(i.target || '')}">${L('Completar', 'Complete')}</button>` })); });
+    const nsCtx = used && st0 ? (secs.find(x => x.st.includes(st0.n)) || {}) : null;
+    const nsMain = nsCtx ? { k: nsCtx.n + '. ' + nsCtx.name, t: ns.t, d: missTxt(ns.d), btn: ns.btn.replace(/>[^<]*Ir|>[^<]*Go/, '>' + L('Completar', 'Complete')) } : ns;
+    const next = `<section class="v7s-sec" aria-labelledby="v7s-n"><h2 id="v7s-n" class="v7s-h">${L('Siguiente paso', 'Next step')}</h2>
+      <div class="v7s-main ${ns.ai ? 'ai' : ''}"><div><span class="v7s-ctx">${ns.ai ? ic('spark', 'sm') : ''}${h(nsMain.k)}</span><b>${h(nsMain.t)}</b>${nsMain.d ? `<p>${h(nsMain.d)}</p>` : ''}</div>${nsMain.btn}</div>
+      ${more.length || pendTot ? `<div class="v7s-list">${more.slice(0, 2).map(m => `<div class="v7s-row">${m.ai ? `<span class="v7-chip ai">${ic('spark', 'sm')}omnIA</span>` : `<span class="v7-chip warn">${L('Pendiente', 'Pending')}</span>`}<span class="v7s-rt"><b>${h(m.t)}</b><small>${h(m.d)}</small></span>${m.btn}</div>`).join('')}
+        ${pendTot ? `<button class="v7s-all" data-act="pend-open">${L(`Ver los ${pendTot} pendientes por etapa`, `See all ${pendTot} pending items by stage`)}</button>` : ''}</div>` : ''}</section>`;
+    // 3 · lo que hemos encontrado
+    const fs = a.findings || []; const fver = fs.filter(f => /pendiente|verif/i.test(f.status || '')).length;
+    const ex = C.expo ? C.expo(a) : null; const lv = { Alto: 0, Medio: 1, Bajo: 2 };
+    const scored = (a.scenarios || []).map(s => ({ s, l: C.LEVEL(s.C, s.P) })).filter(x => x.l);
+    const top = scored.slice().sort((x, y) => lv[x.l] - lv[y.l]).slice(0, 3);
+    const tile = (k, v, d, act) => `<${act ? `button class="v7s-tile" ${act}` : 'div class="v7s-tile"'}><small>${k}</small>${v}<span>${d}</span></${act ? 'button' : 'div'}>`;
+    const exV = ex && ex.ok.length ? `<b>${U.money(ex.tot.min)}${ex.tot.max !== ex.tot.min ? ' – ' + U.money(ex.tot.max) : ''}</b>` : `<b class="sm">${L('Aún no se puede calcular', 'Not available yet')}</b>`;
+    const exD = ex && ex.ok.length ? L(`por parada, con ${pl(ex.ok.length, 'proceso', 'procesos')}`, `per outage, from ${pl(ex.ok.length, 'process', 'processes')}`) : L('Falta la tolerancia, la recuperación o el costo de parada de los procesos.', 'Process tolerance, recovery or outage cost is still missing.');
+    const tiles = tile(L('Hallazgos', 'Findings'), `<b>${fs.length}</b>`, fs.length ? (fver ? L(`${fver} por verificar`, `${fver} to verify`) : L('todos confirmados', 'all confirmed')) : L('Se registran en campo o desde documentos.', 'Recorded on site or from documents.'))
+      + tile(L('Exposición en dinero', 'Money at risk'), exV, exD)
+      + tile(L('Riesgos evaluados', 'Assessed risks'), scored.length ? `<b>${scored.length}</b>` : `<b class="sm">${L('Desde la etapa 5', 'From stage 5')}</b>`, scored.length ? L(`${scored.filter(x => x.l === 'Alto').length} de nivel alto`, `${scored.filter(x => x.l === 'Alto').length} high`) : L('Aparecerán al evaluar escenarios.', 'They appear once scenarios are assessed.'))
+      + tile(L('Confianza del dato', 'Data confidence'), `<b>${dq.okPct} %</b>`, dq.tot ? L(`cuenta para el análisis; ${dq.verPct} % verificado`, `counts for the analysis; ${dq.verPct}% verified`) : L('Aún no hay inventario.', 'No inventory yet.'));
+    const fOrd = { confirmado: 0 }; const topF = fs.slice().sort((x, y) => (fOrd[x.status] ?? 1) - (fOrd[y.status] ?? 1)).slice(0, 3);
+    const list = top.length ? `<div class="v7s-list"><div class="v7s-lh">${L('Riesgos principales', 'Top risks')}</div>${top.map(({ s, l }) => `<button class="v7s-row link" data-act="go" data-stage="6" data-target="scn-${h(s.id)}">${U.lv(l)}<span class="v7s-rt"><b>${h(tx(s.title))}</b><small>${h(C.procName(a, s.proc))}</small></span>${ic('chev', 'sm')}</button>`).join('')}</div>`
+      : topF.length ? `<div class="v7s-list"><div class="v7s-lh">${L('Hallazgos más relevantes', 'Key findings')}</div>${topF.map(f => `<button class="v7s-row link" data-act="go" data-stage="6" data-target="finding-${h(f.id)}"><code>${h(f.id)}</code><span class="v7s-rt"><b>${h(tx(f.title))}</b></span>${FLV[f.level] ? `<span class="v7-chip">${L(FLV[f.level][0], FLV[f.level][1])}</span>` : ''}${ic('chev', 'sm')}</button>`).join('')}${fs.length > 3 ? `<button class="v7s-all" data-act="go" data-stage="6">${L(`Ver los ${fs.length} hallazgos`, `See all ${fs.length} findings`)}</button>` : ''}</div>` : '';
+    const found = `<section class="v7s-sec" aria-labelledby="v7s-f"><h2 id="v7s-f" class="v7s-h">${L('Lo que hemos encontrado', 'What we have found')}</h2><div class="v7s-tiles">${tiles}</div>${list}</section>`;
+    return `<div class="v7s">${prog}${next}${U.ingestCTA ? U.ingestCTA(a, ev) : ''}${found}</div>`;
+  };
+  // la nueva vista vive dentro del assessment abierto
+  const r0 = U.render;
+  U.render = function () { if (C.S.ui.view === 'summary' && !C.cur()) C.S.ui.view = 'home'; document.body.classList.toggle('v7-on-sum', C.S.ui.view === 'summary'); return r0.apply(this, arguments); };
+  // crear un assessment lleva al Resumen
+  const nc0 = A['new-create']; A['new-create'] = function () { nc0.apply(this, arguments); if (C.cur() && C.S.ui.view === 'wizard') { C.S.ui.view = 'summary'; C.save(); U.render(); } };
+
+  // ⓘ: ayuda bajo demanda que se abre al tocar (globo en escritorio, hoja inferior en celular)
+  U.info = (txt, title) => `<button class="v7-i" data-act="v7-info" data-t="${h(title || '')}" data-x="${h(txt)}" aria-label="${L('Más información', 'More information')}">i</button>`;
+  A['v7-info'] = el => {
+    document.querySelectorAll('.v7-pop').forEach(x => x.remove());
+    const pop = document.createElement('div'); pop.className = 'v7-pop'; pop.setAttribute('role', 'dialog');
+    pop.innerHTML = `<div class="v7-popc">${el.dataset.t ? `<b>${h(el.dataset.t)}</b>` : ''}${el.dataset.x.split(/\n\n/).map(t => `<p>${h(t)}</p>`).join("")}<button class="btn ghost sm" data-v7close>${L('Entendido', 'Got it')}</button></div>`;
+    document.body.appendChild(pop);
+    if (innerWidth > 720) { const r = el.getBoundingClientRect(); const c = pop.firstChild; c.style.position = 'fixed'; c.style.left = Math.max(12, Math.min(innerWidth - 332, r.left - 150)) + 'px'; c.style.top = (r.bottom + 8 + 220 > innerHeight ? Math.max(12, r.top - 8 - c.offsetHeight) : r.bottom + 8) + 'px'; } else pop.classList.add('sheet');
+    setTimeout(() => pop.addEventListener('click', e => { if (e.target === pop || e.target.closest('[data-v7close]')) pop.remove(); }), 0);
+  };
+})();
+/* ORA v7 — menos texto fijo: las explicaciones de cada sección pasan a un ⓘ que se abre al tocar. */
+(function () {
+  const U = window.ORA_UI, C = window.ORA, L = window.ORA_I18N.L;
+  const r0 = U.render;
+  U.render = function () {
+    r0.apply(this, arguments);
+    if (C.S.ui.view === 'login') return;
+    document.querySelectorAll('.main .box').forEach(box => {
+      const head = box.querySelector(':scope > .box-head'); if (!head || head.querySelector('.v7-i')) return;
+      const texts = [];
+      head.querySelectorAll(':scope > p').forEach(p => { if (p.querySelector('button, a, input, select')) return; const t = p.textContent.trim(); if (t) texts.push(t); p.remove(); });
+      box.querySelectorAll(':scope > .box-body > p.hint').forEach(p => { if (p.querySelector('button, a, input, select')) return; const t = p.textContent.trim(); if (t) texts.push(t); p.remove(); });
+      if (!texts.length) return;
+      const t = head.querySelector('h3'); const b = document.createElement('button');
+      b.className = 'v7-i'; b.dataset.act = 'v7-info'; b.dataset.t = t ? t.textContent.trim() : ''; b.dataset.x = texts.join('\n\n'); b.setAttribute('aria-label', L('Más información', 'More information')); b.textContent = 'i';
+      if (t) t.insertAdjacentElement('afterend', b); else head.prepend(b);
+    });
+  };
+})();
+</script>
 <script src="app/v7-prop.js?v=70"></script>
 <script src="app/v7-ing.js?v=70"></script>
 <script src="app/v7-field.js?v=70"></script>
@@ -934,6 +1050,80 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
 <link rel="stylesheet" href="omnia/omnia.css?v=70">
 <link rel="stylesheet" href="app/v6.css?v=70">
 <link rel="stylesheet" href="app/v7.css?v=73">
+<style id="v74-sum">
+/* v74 · Resumen en tres preguntas: ¿cómo vamos?, ¿qué hago ahora?, ¿qué hemos encontrado? */
+.v7-on-sum .top .ring { display: none; }
+.v7s { display: flex; flex-direction: column; gap: 26px; max-width: 1120px; }
+.v7s-prog { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-surf); padding: 22px 24px; display: flex; flex-direction: column; gap: 18px; }
+.v7s-ph { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between; }
+.v7s-pt { min-width: 0; flex: 1 1 300px; }
+.v7s-code { font-size: 12px; font-weight: 600; color: var(--bright); }
+.v7s-pt h1 { margin: 4px 0 2px; font-size: 24px; font-weight: 600; letter-spacing: -.2px; line-height: 1.25; }
+.v7s-pt p { margin: 0; color: var(--muted); }
+.v7s-pn { text-align: right; display: flex; flex-direction: column; }
+.v7s-pn b { font-size: 30px; font-weight: 600; line-height: 1; }
+.v7s-pn small { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.v7s-segs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.v7s-seg { font: inherit; text-align: left; display: flex; flex-direction: column; gap: 6px; padding: 4px 2px; border: 0; background: none; color: var(--ink); cursor: pointer; border-radius: 6px; min-width: 0; }
+.v7s-seg:hover b { color: var(--bright); }
+.v7s-bar { display: block; height: 8px; border-radius: 4px; background: var(--grid); overflow: hidden; }
+.v7s-bar i { display: block; height: 100%; background: var(--bright); border-radius: 4px; }
+.v7s-seg.st-complete .v7s-bar i { background: var(--lv-low); }
+.v7s-seg b { font-size: 13px; font-weight: 500; line-height: 1.3; }
+.v7s-seg small { font-size: 12px; color: var(--muted); }
+.v7s-pf { border-top: 1px solid var(--line-2); padding-top: 14px; }
+.v7s-team { font: inherit; display: inline-flex; align-items: center; gap: 10px; padding: 4px 8px 4px 0; border: 0; background: none; color: var(--bright); font-size: 13px; cursor: pointer; min-height: 40px; }
+.v7s-team:hover span { text-decoration: underline; }
+.v7s-sec { display: flex; flex-direction: column; gap: 12px; }
+.v7s-h { margin: 0; font-size: 16px; font-weight: 600; }
+.v7s-main { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 20px 24px; border-radius: var(--r-surf); background: var(--surface); border: 1.5px solid var(--bright); }
+.v7s-main > div { flex: 1 1 320px; min-width: 0; }
+.v7s-main.ai { border-color: var(--ai); }
+.v7s-ctx { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.v7s-main.ai .v7s-ctx { color: var(--ai); }
+.v7s-main b { display: block; font-size: 18px; font-weight: 600; margin-top: 4px; line-height: 1.35; }
+.v7s-main p { margin: 4px 0 0; color: var(--muted); }
+.v7s-main .btn { min-height: 44px; padding-inline: 20px; }
+.v7s-list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-surf); overflow: hidden; }
+.v7s-lh { padding: 14px 22px 8px; font-size: 13px; color: var(--muted); }
+.v7s-row { font: inherit; width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; padding: 12px 22px; border: 0; border-top: 1px solid var(--line-2); background: none; color: var(--ink); }
+.v7s-list > .v7s-row:first-child { border-top: 0; }
+.v7s-row.link { cursor: pointer; }
+.v7s-row.link:hover { background: var(--surface-2); }
+.v7s-row code { font-size: 12px; color: var(--muted); min-width: 40px; }
+.v7s-rt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.v7s-rt b { font-weight: 500; }
+.v7s-rt small { font-size: 12px; color: var(--muted); }
+.v7s-all { font: inherit; display: block; width: 100%; text-align: left; padding: 12px 22px; border: 0; border-top: 1px solid var(--line-2); background: none; color: var(--bright); font-size: 13px; font-weight: 500; cursor: pointer; }
+.v7s-all:hover { text-decoration: underline; }
+.v7s-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.v7s-tile { font: inherit; text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-surf); color: var(--ink); }
+.v7s-tile small { font-size: 13px; color: var(--muted); }
+.v7s-tile b { font-size: 26px; font-weight: 600; line-height: 1.15; }
+.v7s-tile b.sm { font-size: 15px; line-height: 1.35; margin-top: 4px; }
+.v7s-tile span { font-size: 12px; color: var(--muted); }
+@media (max-width: 1100px) { .v7s-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .v7s-segs { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 14px; } }
+@media (max-width: 720px) {
+  .v7s { gap: 22px; }
+  .v7s-prog { padding: 18px; gap: 14px; }
+  .v7s-pt h1 { font-size: 20px; }
+  .v7s-pn { text-align: left; flex-direction: row; align-items: baseline; gap: 8px; }
+  .v7s-pn b { font-size: 26px; }
+  .v7s-segs { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+  .v7s-seg b, .v7s-seg small { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .v7s-seg { min-height: 32px; justify-content: center; }
+  .v7s-seg::after { content: attr(data-n); font-size: 11px; color: var(--muted); text-align: center; }
+  .v7s-main { padding: 16px; }
+  .v7s-main b { font-size: 16px; }
+  .v7s-main .btn { flex: 1 1 100%; justify-content: center; }
+  .v7s-row { padding: 12px 16px; flex-wrap: wrap; }
+  .v7s-row:has(> .btn) { align-items: flex-start; gap: 8px; }
+  .v7s-row:has(> .btn) .v7s-rt { flex: 1 1 100%; order: 1; }
+  .v7s-row:has(> .btn) > .btn { order: 2; min-height: 40px; }
+  .v7s-lh, .v7s-all { padding-inline: 16px; }
+  .v7s-tile b { font-size: 22px; }
+}
+</style>
 
 
 </body>
