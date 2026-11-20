@@ -303,3 +303,26 @@ body.fm-on .v7-live { bottom: 120px; }
 .v7-expo .v7-el li b { font-size: 13px; font-weight: 500; margin: 0; line-height: 1.3; }
 .mat-sum { grid-template-columns: repeat(5, minmax(0,1fr)) !important; } @media (max-width: 900px) { .mat-sum { grid-template-columns: repeat(3, minmax(0,1fr)) !important; } }
 @media (max-width: 560px) { .mat-sum { grid-template-columns: repeat(2, minmax(0,1fr)) !important; } }
+
+/* ---------- tarjeta de proceso: ⋮ siempre arriba a la derecha; en celular, etiquetas encima del valor ---------- */
+.v6-pc-h { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: "tg pills menu car"; align-items: start; column-gap: 8px; row-gap: 8px; }
+.v6-pc-h > .v6-pc-tg { grid-area: tg; } .v6-pc-h > .v6-pc-pills { grid-area: pills; align-self: center; } .v6-pc-h > .v6-kebab { grid-area: menu; } .v6-pc-h > .v6-pc-car { grid-area: car; }
+@media (max-width: 760px) {
+  .v6-pc-h { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "tg menu car" "pills pills pills"; padding: 12px 8px 12px 14px; }
+  .v6-pc-h > .v6-pc-pills { justify-content: flex-start; }
+  .v6-pc-tg { flex-wrap: wrap; row-gap: 6px; }
+  .v6-pc-tg .v6-pc-t { flex: 1 1 100%; }
+  .v6-pc-kv, .v6-kv { grid-template-columns: 1fr !important; row-gap: 0 !important; }
+  .v6-pc-kv > span:nth-child(odd), .v6-kv > span:nth-child(odd) { margin-top: 10px; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .v6-pc-kv > span:first-child, .v6-kv > span:first-child { margin-top: 0; }
+}
+@media (max-width: 760px) { .v6-kvr { grid-template-columns: 1fr; gap: 2px; padding: 10px 14px; } .v6-kvr > dt { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; } }
+
+/* decisión del proceso: cuatro botones en una fila, compactos en celular */
+.v6-pc-b .pc-actions .plink[data-act="proc-adapt"] { display: none; }
+@media (max-width: 760px) {
+  .v6-pc-b .pc-actions { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .v6-pc-b .pc-actions .pbtn, .v6-pc-b .pc-actions .plink[data-act="proc-status"] { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 52px; width: auto; padding: 6px 4px; font-size: 11.5px; line-height: 1.2; text-align: center; border-radius: 10px; white-space: normal; }
+  .v6-pc-b .pc-actions .plink[data-act="proc-status"] { border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 500; }
+  .v6-pc-b .pc-actions .plink[data-act="proc-status"][aria-pressed="true"] { background: var(--muted); color: #fff; border-color: var(--muted); }
+}
