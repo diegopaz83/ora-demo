@@ -1126,5 +1126,299 @@ button.cp-s { text-decoration: underline; text-decoration-color: var(--line); te
 </style>
 
 
+<style id="v75-q">
+/* v75 · preguntas fáciles en campo */
+/* sin líneas de acento a la izquierda: el estado se dice con texto y color de la etiqueta */
+.v6-pc.m-view.st-incluido, .v6w-proc.open, .v6qa, .v6qa.ok, .v6qa.cond, .v6fo, .v6fo.orphan, .v6fo.dis, .irow.v6-ir, .irow.v6-ir.m-sugerido, .irow.v6-ir.m-validado, .irow.v6-ir.m-evaluado, .irow.v6-ir.m-descartado, .aix-c, .aix-c.s-alta, .aix-c.s-media, .aix-c.s-baja, .aix-c.kb { border-left: 1px solid var(--line); }
+.v7-q { border-left: 0; border-radius: 8px; }
+.v6-pc:has(.q75) .v6-pc-pills .pill.pri { display: none; }
+
+/* micrófono dentro del campo */
+.q75-mw { position: relative; display: block; width: 100%; }
+.q75-mw > input, .q75-mw > textarea { width: 100%; box-sizing: border-box; padding-right: 48px !important; }
+.q75-mic { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 8px; border: 0; background: transparent; color: var(--bright); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.q75-mw.ta .q75-mic { top: 4px; transform: none; }
+.q75-mic:hover { background: var(--primary-soft); }
+.q75-mic.on { background: var(--err-bg); color: var(--err-ink); }
+.q75-mic.on svg { animation: q75p 1.2s ease-in-out infinite; }
+@keyframes q75p { 50% { opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .q75-mic.on svg { animation: none; } }
+
+/* preguntas de un proceso */
+.q75 { display: flex; flex-direction: column; gap: 2px; }
+.q75-top { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 4px; border-bottom: 1px solid var(--line-2); }
+.q75-dec { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-2); }
+.q75-dec button { font: inherit; font-size: 13px; padding: 7px 12px; min-height: 36px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.q75-dec button.on { background: var(--surface); color: var(--primary); font-weight: 600; box-shadow: var(--shadow-sm); }
+.q75-prog { display: flex; align-items: center; gap: 10px; }
+.q75-bar { width: 120px; height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; display: block; }
+.q75-bar i { display: block; height: 100%; background: var(--bright); border-radius: 3px; }
+.q75-bar i.ok { background: var(--lv-low); }
+.q75-prog small { font-size: 12px; color: var(--muted); }
+.q75-gh { font-size: 13px; font-weight: 600; color: var(--muted); padding: 10px 2px 4px; }
+.q75r { border-radius: 10px; border: 1.5px solid transparent; }
+.q75r + .q75r { border-top-color: var(--line-2); border-top-width: 1px; }
+.q75r.open { border: 1.5px solid var(--bright); background: var(--surface-2); margin: 4px 0; }
+.q75r-h { font: inherit; width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; padding: 12px 10px; min-height: 56px; border: 0; background: none; color: var(--ink); cursor: pointer; border-radius: 10px; }
+.q75r-h:hover { background: var(--surface-2); }
+.q75r-h.static { cursor: default; padding-bottom: 4px; }
+.q75r-h.static:hover { background: none; }
+.q75r-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.q75r-q { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.q75r.open .q75r-q { font-size: 15px; font-weight: 600; color: var(--ink); }
+.q75r-help { font-size: 13px; color: var(--muted); }
+.q75r-v { font-size: 15px; color: var(--ink); overflow-wrap: anywhere; }
+.q75r-v.empty { color: var(--warn-ink); }
+.q75r-e { font-size: 13px; font-weight: 500; color: var(--bright); white-space: nowrap; }
+.q75-falta { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: var(--warn-bg); color: var(--warn-ink); }
+.q75r-ed { display: flex; flex-direction: column; gap: 12px; padding: 6px 10px 12px; }
+.q75r-ed textarea, .q75r-ed input[type=text], .q75r-ed input[type=number], .q75r-ed select { font: inherit; font-size: 16px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.q75-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.q75-opts button { font: inherit; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; min-height: 56px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.q75-opts button small { font-size: 12px; color: var(--muted); }
+.q75-opts button.on { border-color: var(--primary); background: var(--primary-soft); }
+.q75-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.q75-chips button { font: inherit; font-size: 14px; font-weight: 500; min-height: 44px; min-width: 64px; padding: 0 14px; border-radius: 22px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.q75-chips button.on { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.q75-other { display: flex; flex-direction: column; gap: 4px; }
+.q75-other label, .q75-lbl { font-size: 13px; color: var(--muted); }
+.q75-other span { display: flex; gap: 8px; }
+.q75-other input { width: 110px; }
+.q75-act { display: flex; align-items: center; gap: 8px; }
+.q75-sp { flex: 1; }
+.q75-act .btn { min-height: 40px; }
+.q75-more { font: inherit; width: 100%; text-align: left; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 10px; margin-top: 8px; border: 0; border-top: 1px solid var(--line-2); background: none; color: var(--ink); cursor: pointer; }
+.q75-more b { display: block; font-size: 13px; color: var(--muted); }
+.q75-more small { font-size: 12px; color: var(--muted); }
+.q75-more em { font-style: normal; font-size: 13px; color: var(--bright); }
+.q75-note { font-size: 12px; color: var(--muted); margin: 6px 10px; }
+.q75 .trace { margin-top: 10px; }
+
+/* cuestionario */
+.q75q { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.q75q.ok { border-color: var(--line); }
+.q75q-h { display: flex; gap: 12px; align-items: flex-start; }
+.q75q-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.q75q-t b { font-size: 15px; font-weight: 500; line-height: 1.4; }
+.q75q-t small { font-size: 12px; color: var(--muted); display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.q75q-t code { font-size: 11px; }
+.q75-ans { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; max-width: 560px; }
+.q75-ans button { font: inherit; font-size: 14px; font-weight: 500; min-height: 44px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.q75-ans button:hover { border-color: var(--bright); }
+.q75-ans button.on.si { background: var(--ok-bg); border-color: var(--lv-low); color: var(--ok-ink); font-weight: 600; }
+.q75-ans button.on.no { background: var(--err-bg); border-color: var(--err-ink); color: var(--err-ink); font-weight: 600; }
+.q75-ans button.on.unk { background: var(--warn-bg); border-color: var(--warn-ink); color: var(--warn-ink); font-weight: 600; }
+.q75-ans button.on.na { background: var(--off-bg); border-color: var(--off-ink); color: var(--ink); font-weight: 600; }
+.q75q-f { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.q75q-note { font: inherit; flex: 1 1 100%; text-align: left; display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; border: 0; background: var(--surface-2); color: var(--ink); cursor: pointer; }
+.q75q-note span { flex: 1; font-size: 14px; }
+.q75q-note em { font-style: normal; font-size: 13px; color: var(--bright); }
+.q75q .plink { min-height: 40px; }
+.q75q .plink.warnl { color: var(--warn-ink); font-weight: 600; }
+.q75q .q75r-ed { padding: 4px 0 0; }
+.q75-conf { display: inline-flex; gap: 4px; padding: 4px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-2); align-self: flex-start; }
+.q75-conf button { font: inherit; font-size: 13px; padding: 6px 12px; min-height: 36px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.q75-conf button.on { background: var(--surface); color: var(--primary); font-weight: 600; box-shadow: var(--shadow-sm); }
+.q75-detail { display: flex; flex-direction: column; gap: 6px; }
+.q75-back { align-self: flex-start; }
+
+@media (max-width: 720px) {
+  .q75-top { flex-direction: column; align-items: stretch; }
+  .q75-dec { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .q75-dec button { min-height: 40px; }
+  .q75-opts { grid-template-columns: 1fr; }
+  .q75-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .q75-chips button { min-height: 48px; }
+  .q75-act .btn { flex: 1; justify-content: center; min-height: 48px; }
+  .q75-act .q75-sp { display: none; }
+  .q75-ans { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; }
+  .q75-ans button { min-height: 48px; }
+  .q75q { padding: 14px; }
+}
+</style>
+<script id="v75-q-js">
+/* v75 · Preguntas fáciles en campo: cada dato es una pregunta que se responde o edita en su sitio,
+   las opciones se guardan con un toque y todo campo de texto tiene micrófono. */
+(function () {
+  const C = window.ORA, U = window.ORA_UI, I = window.ORA_I18N;
+  const h = C.esc, L = I.L, tx = I.tx, ic = U.ic, A = U.act;
+  const R = () => U.render();
+  const now = () => new Date().toISOString();
+  const me = () => C.uname(C.S.userId);
+  let QE = null;          // pregunta abierta: { k: proceso, f: campo } o { q: id de pregunta }
+  let SCROLL = false; let OPENING = null;     // llevar la pregunta abierta a la vista tras pintar
+  const MORE = new Set(); // procesos con «Más contexto» abierto
+  const DETAIL = new Set(); // preguntas del cuestionario en vista de evidencia y hallazgos
+
+  // ---------- micrófono en un campo ----------
+  U.mic75 = id => `<button type="button" class="q75-mic" data-act="q75-mic" data-for="${id}" aria-label="${L('Dictar con el micrófono', 'Dictate with the microphone')}" title="${L('Dictar', 'Dictate')}">${ic('mic', 'sm')}</button>`;
+  A['q75-mic'] = el => {
+    const f = document.getElementById(el.dataset.for); if (!f) return;
+    if (U.dictOn) { U.dictStop(); return; }
+    el.classList.add('on');
+    U.dictate(t => { f.value = (f.value && f.value.trim() ? f.value.replace(/\s+$/, '') + ' ' : '') + t; f.dispatchEvent(new Event('input', { bubbles: true })); },
+      () => { el.classList.remove('on'); f.dispatchEvent(new Event('change', { bubbles: true })); try { f.focus(); } catch (e) {} }, { keep: true });
+  };
+  // a todo campo de texto de la app se le agrega micrófono
+  let SEQ = 0;
+  function micify(root) {
+    (root || document).querySelectorAll('#main textarea, #main input[type="text"], #main input:not([type]), .modal textarea, .modal input[type="text"], .modal input:not([type])').forEach(f => {
+      if (f.dataset.nomic || f.readOnly || f.disabled || f.closest('.q75-mw') || f.closest('.v7-live')) return;
+      if (f.offsetWidth && f.offsetWidth < 150) return;
+      if (/search|buscar/i.test((f.getAttribute('placeholder') || '') + ' ' + (f.getAttribute('aria-label') || '')) && f.tagName === 'INPUT') return;
+      if (!f.id) f.id = 'q75f-' + (++SEQ);
+      const w = document.createElement('span'); w.className = 'q75-mw' + (f.tagName === 'TEXTAREA' ? ' ta' : '');
+      f.parentNode.insertBefore(w, f); w.appendChild(f); w.insertAdjacentHTML('beforeend', U.mic75(f.id));
+    });
+  }
+
+  // ---------- piezas comunes ----------
+  const row = (o) => `<div class="q75r ${o.open ? 'open' : ''} ${o.miss ? 'miss' : ''}" id="${o.id}">
+      ${o.open ? `<div class="q75r-h static"><span class="q75r-t"><span class="q75r-q">${o.q}${o.miss ? `<span class="q75-falta">${L('Falta', 'Missing')}</span>` : ''}</span>${o.help ? `<span class="q75r-help">${o.help}</span>` : ''}</span></div>`
+        : `<button class="q75r-h" data-act="${o.act}" ${o.data} aria-label="${h((o.val ? L('Editar: ', 'Edit: ') : L('Responder: ', 'Answer: ')) + o.qPlain)}"><span class="q75r-t"><span class="q75r-q">${o.q}${o.miss ? `<span class="q75-falta">${L('Falta', 'Missing')}</span>` : ''}</span><span class="q75r-v ${o.val ? '' : 'empty'}">${o.val || L('Sin responder', 'Not answered')}</span></span><span class="q75r-e">${o.val ? L('Editar', 'Edit') : L('Responder', 'Answer')}</span></button>`}
+      ${o.open ? `<div class="q75r-ed">${o.editor}</div>` : ''}</div>`;
+  const actions = (save, extra) => `<div class="q75-act">${extra || ''}<span class="q75-sp"></span><button class="btn ghost sm" data-act="q75-cancel">${L('Cancelar', 'Cancel')}</button><button class="btn primary sm" data-act="${save}">${ic('check', 'sm')}${L('Guardar', 'Save')}</button></div>`;
+  A['q75-cancel'] = () => { QE = null; R(); };
+
+  // ---------- Alcance: preguntas de cada proceso crítico ----------
+  const TYPE = () => [['productivo', L('Productivo', 'Production'), L('Genera el producto o servicio', 'Produces the product or service')], ['auxiliar', L('Servicio auxiliar', 'Auxiliary service'), L('Apoya a otros procesos', 'Supports other processes')], ['salvaguarda', L('Salvaguarda', 'Safeguard'), L('Protege personas y planta', 'Protects people and plant')]];
+  const CRIT = () => [['Alta', L('Alta', 'High'), L('Detenerlo para la operación', 'Stopping it halts operations')], ['Media', L('Media', 'Medium'), L('Afecta, pero hay cómo seguir', 'It hurts, but operations go on')], ['Baja', L('Baja', 'Low'), L('Impacto menor', 'Minor impact')]];
+  const TOL = [[30, 'min', '30 min'], [1, 'h', '1 h'], [2, 'h', '2 h'], [4, 'h', '4 h'], [8, 'h', '8 h'], [24, 'h', '24 h']];
+  const fmtTol = t => !t || t.value == null || t.value === '' ? '' : t.value + ' ' + (t.unit === 'días' ? L('días', 'days') : t.unit);
+  const PF = () => ({
+    just: { q: L('¿Por qué entra en la evaluación?', 'Why is it included in the assessment?'), kind: 'long', get: p => p.just },
+    crit: { q: L('¿Qué tan crítico es para el negocio?', 'How critical is it to the business?'), kind: 'choice', opts: CRIT, get: p => p.crit },
+    type: { q: L('¿Qué tipo de proceso es?', 'What type of process is it?'), kind: 'choice', opts: TYPE, get: p => p.type },
+    interruption: { q: L('¿Qué pasa si se detiene?', 'What happens if it stops?'), kind: 'long', get: p => p.interruption },
+    tol: { q: L('¿Cuánto tiempo puede estar detenido?', 'How long can it be stopped?'), help: L('Antes de que el impacto sea inaceptable. Con este dato se calcula la exposición en dinero.', 'Before the impact becomes unacceptable. It is used to estimate money at risk.'), kind: 'time', get: p => fmtTol(p.tolerance) },
+    function: { q: L('¿Qué hace este proceso?', 'What does this process do?'), kind: 'text', get: p => p.function },
+    capacityAffected: { q: L('¿Qué parte de la capacidad se pierde si se detiene?', 'How much capacity is lost if it stops?'), kind: 'text', ph: L('p. ej. 100 % del despacho', 'e.g. 100% of dispatch'), get: p => p.capacityAffected },
+    tolsrc: { q: L('¿De dónde sale el dato de tolerancia?', 'Where does the tolerance figure come from?'), kind: 'text', ph: L('Contrato, permiso, entrevista…', 'Contract, permit, interview…'), get: p => (p.tolerance || {}).source },
+    constraints: { q: L('¿Hay restricciones para detenerlo o intervenirlo?', 'Are there constraints on stopping or working on it?'), kind: 'text', ph: L('Ventanas de parada, contratos…', 'Shutdown windows, contracts…'), get: p => p.constraints },
+    source: { q: L('¿Quién o qué documento sustenta estas respuestas?', 'Who or what document supports these answers?'), kind: 'text', ph: L('Entrevista, procedimiento, contrato…', 'Interview, procedure, contract…'), get: p => p.source }
+  });
+  const REQ = p => ['just', 'crit', 'type', 'interruption'].concat(p.type === 'salvaguarda' ? [] : ['tol']);
+  const OPTF = p => ['function', 'capacityAffected'].concat(p.type === 'salvaguarda' ? [] : ['tolsrc']).concat(['constraints', 'source']);
+  const shown = (f, p, v) => { const d = PF()[f]; if (d.kind === 'choice') { const o = d.opts().find(x => x[0] === v); return o ? h(o[1]) : (v ? h(tx(v)) : ''); } return v ? h(tx(String(v))) : ''; };
+
+  function editorFor(p, f) {
+    const d = PF()[f], v = d.get(p);
+    if (d.kind === 'choice') return `<div class="q75-opts" role="radiogroup" aria-label="${h(d.q)}">${d.opts().map(o => `<button role="radio" aria-checked="${v === o[0]}" class="${v === o[0] ? 'on' : ''}" data-act="q75-pset" data-k="${p.key}" data-f="${f}" data-v="${o[0]}"><b>${o[1]}</b><small>${o[2]}</small></button>`).join('')}</div><div class="q75-act"><span class="q75-sp"></span><button class="btn ghost sm" data-act="q75-cancel">${L('Cancelar', 'Cancel')}</button></div>`;
+    if (d.kind === 'time') { const t = p.tolerance || {};
+      return `<div class="q75-chips" role="radiogroup" aria-label="${h(d.q)}">${TOL.map(o => { const on = +t.value === o[0] && t.unit === o[1]; return `<button role="radio" aria-checked="${on}" class="${on ? 'on' : ''}" data-act="q75-tol" data-k="${p.key}" data-v="${o[0]}" data-u="${o[1]}">${o[2]}</button>`; }).join('')}</div>
+        <div class="q75-other"><label for="q75-tv">${L('Otro valor', 'Other value')}</label><span><input id="q75-tv" type="number" min="0" inputmode="decimal" value="${t.value != null && !TOL.some(o => +t.value === o[0] && t.unit === o[1]) ? h(String(t.value)) : ''}" placeholder="12"><select id="q75-tu" aria-label="${L('Unidad', 'Unit')}">${[['h', L('horas', 'hours')], ['min', L('minutos', 'minutes')], ['días', L('días', 'days')]].map(o => U.opt(o[0], o[1], t.unit || 'h')).join('')}</select></span></div>
+        ${actions('q75-tolsave').replace('data-act="q75-tolsave"', `data-act="q75-tolsave" data-k="${p.key}"`)}`; }
+    const id = 'q75-in';
+    const fld = d.kind === 'long' ? `<textarea id="${id}" rows="3" placeholder="${h(d.ph || L('Escriba o dicte la respuesta', 'Type or dictate the answer'))}">${h(tx(v || ''))}</textarea>` : `<input id="${id}" type="text" value="${h(tx(v || ''))}" placeholder="${h(d.ph || L('Escriba o dicte la respuesta', 'Type or dictate the answer'))}" enterkeyhint="done">`;
+    return `<span class="q75-mw ${d.kind === 'long' ? 'ta' : ''}">${fld}${U.mic75(id)}</span>${actions('q75-psave').replace('data-act="q75-psave"', `data-act="q75-psave" data-k="${p.key}" data-f="${f}"`)}`;
+  }
+  function procBody(a, p) {
+    const pf = PF(), req = REQ(p), opt = OPTF(p);
+    const done = req.filter(f => String(pf[f].get(p) || '').trim()).length, od = opt.filter(f => String(pf[f].get(p) || '').trim()).length;
+    const mk = (f, isReq) => { const v = pf[f].get(p); const open = QE && QE.k === p.key && QE.f === f;
+      return row({ id: `q75-${p.key}-${f}`, open, miss: isReq && !String(v || '').trim(), q: h(pf[f].q), qPlain: pf[f].q, help: open && pf[f].help ? h(pf[f].help) : '', val: shown(f, p, v), act: 'q75-popen', data: `data-k="${p.key}" data-f="${f}"`, editor: open ? editorFor(p, f) : '' }); };
+    const ST = [['incluido', L('Se evalúa', 'Assessed')], ['na', L('No aplica', 'Not applicable')], ['fuera', L('Fuera del alcance', 'Out of scope')], ['desconocido', L('No se sabe', 'Unknown')]];
+    const moreOpen = MORE.has(p.key) || (QE && QE.k === p.key && opt.includes(QE.f));
+    return `<div class="q75">
+      <div class="q75-top"><div class="q75-dec" role="radiogroup" aria-label="${L('Decisión sobre el proceso', 'Decision on the process')}">${ST.map(s => `<button role="radio" aria-checked="${p.status === s[0]}" class="${p.status === s[0] ? 'on' : ''}" data-act="proc-status" data-k="${p.key}" data-v="${s[0]}">${s[1]}</button>`).join('')}</div>
+        <div class="q75-prog"><span class="q75-bar"><i style="width:${Math.round(done / req.length * 100)}%" class="${done === req.length ? 'ok' : ''}"></i></span><small>${done === req.length ? L('Obligatorias completas', 'Required answers complete') : L(`${done} de ${req.length} obligatorias respondidas`, `${done} of ${req.length} required answered`)}</small></div></div>
+      <div class="q75-gh">${L('Obligatorias', 'Required')}</div>
+      ${req.map(f => mk(f, true)).join('')}
+      ${p.type === 'salvaguarda' ? `<p class="q75-note">${L('Salvaguarda: protege personas y planta; la tolerancia no aplica.', 'Safeguard: protects people and plant; tolerance does not apply.')}</p>` : ''}
+      <button class="q75-more" data-act="q75-more" data-k="${p.key}" aria-expanded="${moreOpen}"><span><b>${L('Más contexto, opcional', 'More context, optional')}</b><small>${L(`${od} de ${opt.length} respondidas. Sirven para el informe y no bloquean el avance.`, `${od} of ${opt.length} answered. They feed the report and do not block progress.`)}</small></span><em>${moreOpen ? L('Ocultar', 'Hide') : L('Mostrar', 'Show')}</em></button>
+      ${moreOpen ? opt.map(f => mk(f, false)).join('') : ''}
+      <p class="trace">${ic('clock', 'sm')}${L('Decisión registrada por', 'Decision recorded by')} ${h(p.by || C.uname(a.leadId) || '—')}${p.ts ? ' · ' + C.fmtDate(p.ts, true) : ''}</p></div>`;
+  }
+  const procOf = k => { const a = C.cur(); return a && a.processes.find(x => x.key === k); };
+  A['q75-popen'] = el => { QE = { k: el.dataset.k, f: el.dataset.f }; SCROLL = true; R(); };
+  A['q75-more'] = el => { const k = el.dataset.k; if (MORE.has(k)) MORE.delete(k); else MORE.add(k); if (QE && QE.k === k && OPTF(procOf(k)).includes(QE.f)) QE = null; R(); };
+  function setP(p, f, v, lblEs, lblEn) {
+    const a = C.cur();
+    if (f === 'tolsrc') { p.tolerance = Object.assign({}, p.tolerance || {}, { source: v }); }
+    else if (f) p[f] = v;
+    p.by = p.by || me();
+    C.log(a, `Actualizó «${lblEs}» de ${tx(p.name)}`, `Updated “${lblEn}” of ${tx(p.name)}`);
+    QE = null; C.save(); R(); U.toast(L('Guardado', 'Saved'));
+  }
+  const lbls = f => [{ just: 'justificación', crit: 'criticidad', type: 'tipo de proceso', interruption: 'consecuencia de una interrupción', tol: 'tolerancia', function: 'función', capacityAffected: 'capacidad afectada', tolsrc: 'fuente de la tolerancia', constraints: 'restricciones', source: 'fuente' }[f], { just: 'justification', crit: 'criticality', type: 'process type', interruption: 'consequence of an interruption', tol: 'tolerance', function: 'function', capacityAffected: 'capacity affected', tolsrc: 'tolerance source', constraints: 'constraints', source: 'source' }[f]];
+  A['q75-pset'] = el => { const p = procOf(el.dataset.k); if (!p) return; const [e, n] = lbls(el.dataset.f); setP(p, el.dataset.f, el.dataset.v, e, n); };
+  A['q75-psave'] = el => { const p = procOf(el.dataset.k); const f = el.dataset.f; const i = document.getElementById('q75-in'); if (!p || !i) return; const v = i.value.trim();
+    if (!v && REQ(p).includes(f)) { i.focus(); return U.toast(L('Escriba o dicte la respuesta', 'Type or dictate the answer')); } const [e, n] = lbls(f); setP(p, f, v, e, n); };
+  const setTol = (p, value, unit) => { const t = p.tolerance || {}; p.tolerance = Object.assign({}, t, { value, unit, conf: t.conf || 'Declarado' }); const [e, n] = lbls('tol'); setP(p, null, null, e, n); };
+  A['q75-tol'] = el => { const p = procOf(el.dataset.k); if (!p) return; setTol(p, +el.dataset.v, el.dataset.u); };
+  A['q75-tolsave'] = el => { const p = procOf(el.dataset.k); const v = (document.getElementById('q75-tv') || {}).value; if (!p) return; if (v === '' || isNaN(+v)) { const i = document.getElementById('q75-tv'); if (i) i.focus(); return U.toast(L('Elija un tiempo o escriba otro valor', 'Pick a time or type another value')); } setTol(p, +v, (document.getElementById('q75-tu') || {}).value || 'h'); };
+
+  // ---------- Cuestionario: responder con un toque ----------
+  const VALS = () => [['Sí', L('Sí', 'Yes'), 'si'], ['No', L('No', 'No'), 'no'], ['Desconocido', L('No se sabe', 'Unknown'), 'unk'], ['No aplica', L('No aplica', 'N/A'), 'na']];
+  const qCard0 = U.qCard;
+  U.qCard = function (a, x, disBtn) {
+    const q = x.q;
+    if (DETAIL.has(q.id) && qCard0) return `<div class="q75-detail">${qCard0(a, x, disBtn)}<button class="plink q75-back" data-act="q75-qsimple" data-q="${q.id}">${L('Volver a la vista rápida', 'Back to quick view')}</button></div>`;
+    const r = a.answers[q.id] || {}; const ok = C.answerOK(a, q); const open = QE && QE.q === q.id;
+    const nph = C.evPhotos(a, 'q', q.id).length + C.evDocs(a, 'q', q.id).length, nf = a.findings.filter(f => f.q === q.id).length;
+    const meta = [tx(q.dim || ''), q.proc ? C.procName(a, q.proc) : '', !q.req && !x.cond ? L('Complementaria', 'Supplementary') : ''].filter(Boolean).join(' · ');
+    const needNote = r.value === 'No aplica' && !(r.note || '').trim();
+    const noteEd = open ? `<div class="q75r-ed"><label class="q75-lbl" for="q75-qn">${r.value === 'No aplica' ? L('¿Por qué no aplica?', 'Why does it not apply?') : r.value === 'Desconocido' ? L('¿Qué se sabe y cómo verificarlo?', 'What is known and how to verify it?') : L('Explicación y fuente', 'Explanation and source')}</label>
+        <span class="q75-mw ta"><textarea id="q75-qn" rows="3" placeholder="${L('Escriba o dicte', 'Type or dictate')}">${h(tx(r.note || ''))}</textarea>${U.mic75('q75-qn')}</span>
+        <div class="q75-conf" role="radiogroup" aria-label="${L('Confianza', 'Confidence')}">${[['Estimado', L('Estimado', 'Estimated')], ['Verificado', L('Verificado', 'Verified')]].map(o => `<button role="radio" aria-checked="${(r.conf || 'Estimado') === o[0]}" class="${(r.conf || 'Estimado') === o[0] ? 'on' : ''}" data-act="q75-qconf" data-q="${q.id}" data-v="${o[0]}">${o[1]}</button>`).join('')}</div>
+        ${actions('q75-qsave').replace('data-act="q75-qsave"', `data-act="q75-qsave" data-q="${q.id}"`)}</div>` : '';
+    return `<article class="q75q ${ok ? 'ok' : ''} ${x.cond ? 'cond' : ''}" id="q-${q.id}">
+      <div class="q75q-h"><span class="q75q-t"><b>${h(tx(q.text))}</b><small><code>${q.id}</code>${meta ? ' · ' + h(meta) : ''}${x.cond ? ` · ${ic('branch', 'sm')}${h(x.why || L('Condicional', 'Conditional'))}` : ''}</small></span>${disBtn || ''}</div>
+      <div class="q75-ans" role="radiogroup" aria-label="${L('Respuesta', 'Answer')}">${VALS().map(v => `<button role="radio" aria-checked="${r.value === v[0]}" class="${v[2]} ${r.value === v[0] ? 'on' : ''}" data-act="q75-qans" data-q="${q.id}" data-v="${v[0]}">${v[1]}</button>`).join('')}</div>
+      ${open ? noteEd : r.value ? `<div class="q75q-f">${(r.note || '').trim() ? `<button class="q75q-note" data-act="q75-qopen" data-q="${q.id}"><span>${h(tx(r.note))}</span><em>${L('Editar', 'Edit')}</em></button>` : `<button class="plink ${needNote ? 'warnl' : ''}" data-act="q75-qopen" data-q="${q.id}">${ic(needNote ? 'flag' : 'edit', 'sm')}${needNote ? L('Falta explicar por qué no aplica', 'Explain why it does not apply') : L('Agregar nota', 'Add a note')}</button>`}
+        <button class="plink" data-act="q75-qdetail" data-q="${q.id}">${ic('camera', 'sm')}${L('Fotos y hallazgos', 'Photos & findings')}${nph + nf ? ` <b>${nph + nf}</b>` : ''}</button></div>` : ''}</article>`;
+  };
+  A['q75-qans'] = el => {
+    const a = C.cur(); const id = el.dataset.q, v = el.dataset.v; const o = a.answers[id] || {};
+    if (o.value === v) { if (v === 'No aplica' && !(o.note || '').trim()) { QE = { q: id }; SCROLL = true; R(); } return; }
+    const before = C.applicable(a).length;
+    a.answers[id] = { value: v, note: o.note || '', conf: v === 'Desconocido' ? 'Desconocido' : (o.conf && o.conf !== 'Desconocido' ? o.conf : 'Estimado'), ts: now(), prev: o.value || null, by: me(), source: o.source };
+    C.log(a, `Respondió la pregunta ${id}: ${v}`, `Answered question ${id}: ${tx(v)}`);
+    QE = v === 'No aplica' && !(o.note || '').trim() ? { q: id } : (QE && QE.q === id ? QE : null); SCROLL = !!QE; C.save(); R();
+    const d = C.applicable(a).length - before;
+    U.toast(d > 0 ? L(`Respuesta guardada · ${d} preguntas nuevas se activaron`, `Answer saved · ${d} new questions triggered`) : v === 'No aplica' && !(o.note || '').trim() ? L('Guardada. Falta explicar por qué no aplica.', 'Saved. Explain why it does not apply.') : L('Respuesta guardada', 'Answer saved'));
+  };
+  A['q75-qopen'] = el => { QE = { q: el.dataset.q }; SCROLL = true; R(); };
+  A['q75-qconf'] = el => { el.parentNode.querySelectorAll('button').forEach(b => { const on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); }); };
+  A['q75-qsave'] = el => {
+    const a = C.cur(); const id = el.dataset.q; const o = a.answers[id] || {}; const n = ((document.getElementById('q75-qn') || {}).value || '').trim();
+    const cb = document.querySelector('.q75-conf button.on'); const conf = cb ? cb.dataset.v : (o.conf || 'Estimado');
+    if (o.value === 'No aplica' && !n) { const t = document.getElementById('q75-qn'); if (t) t.focus(); return U.toast(L('Explique por qué no aplica', 'Explain why it does not apply')); }
+    a.answers[id] = Object.assign({}, o, { note: n, conf: o.value === 'Desconocido' ? 'Desconocido' : conf, ts: now(), by: me() });
+    C.log(a, `Actualizó la nota de la pregunta ${id}`, `Updated the note of question ${id}`); QE = null; C.save(); R(); U.toast(L('Guardado', 'Saved'));
+  };
+  A['q75-qdetail'] = el => { const id = el.dataset.q; DETAIL.add(id); QE = null; if (A['v6qa-tg']) A['v6qa-tg']({ dataset: { q: id } }); else R(); };
+  A['q75-qsimple'] = el => { const id = el.dataset.q; DETAIL.delete(id); R(); };
+  const tg0 = A['v6qa-tg']; if (tg0) A['v6qa-tg'] = el => { const id = el.dataset.q; if (DETAIL.has(id) && document.querySelector(`#q-${CSS.escape(id)}.open`)) { DETAIL.delete(id); } return tg0(el); };
+
+  // ---------- ir a un pendiente abre la pregunta que falta ----------
+  const goTo0 = U.goTo;
+  U.goTo = function (stage, target) {
+    const m = /^proc-(.+)$/.exec(target || ''); const a = C.cur();
+    if (m && a) { const p = a.processes.find(x => x.key === m[1]); if (p && p.status === 'incluido') { const miss = REQ(p).find(f => !String(PF()[f].get(p) || '').trim()); if (miss) { QE = { k: p.key, f: miss }; SCROLL = true; } } }
+    if (stage === 4 && /^q-/.test(target || '')) { const id = target.slice(2); DETAIL.delete(id); const r = (a.answers[id] || {}); if (r.value === 'No aplica' && !(r.note || '').trim()) { QE = { q: id }; SCROLL = true; } }
+    return goTo0.apply(this, arguments);
+  };
+
+  // ---------- pintar: tomar el cuerpo de los procesos incluidos y agregar micrófonos ----------
+  function enhance() {
+    const a = C.cur();
+    if (a) document.querySelectorAll('#main article.v6-pc').forEach(art => {
+      const k = art.id.replace(/^proc-/, ''); const p = a.processes.find(x => x.key === k);
+      if (!p || p.discarded || p.status !== 'incluido') return;
+      let b = art.querySelector('.v6-pc-b');
+      if (!b && QE && QE.k === k && OPENING !== k && A['v6pc-tg']) { OPENING = k; setTimeout(() => { A['v6pc-tg']({ dataset: { k } }); setTimeout(() => { OPENING = null; }, 50); }, 0); return; }
+      if (!b || b.dataset.q75 === String(C.S.savedAt) + JSON.stringify(QE) + MORE.has(k)) return;
+      b.innerHTML = procBody(a, p); b.dataset.q75 = String(C.S.savedAt) + JSON.stringify(QE) + MORE.has(k); art.classList.add('q75-pc');
+    });
+    micify();
+    if (SCROLL) { const el = document.querySelector('.q75r.open, .q75q .q75r-ed'); if (el) { SCROLL = false; const box = el.closest('.q75r, .q75q'); box.scrollIntoView({ block: 'center', behavior: 'smooth' }); const f = box.querySelector('textarea, input[type=text]'); if (f && innerWidth > 720) setTimeout(() => f.focus({ preventScroll: true }), 250); } }
+  }
+  const r0 = U.render; U.render = function () { const out = r0.apply(this, arguments); try { enhance(); } catch (e) { console.error(e); } return out; };
+  let pend = false; new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; try { enhance(); } catch (e) {} }); }).observe(document.body, { childList: true, subtree: true });
+  // Enter guarda en las respuestas de una línea
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'q75-in' && e.target.tagName === 'INPUT') { e.preventDefault(); const b = e.target.closest('.q75r-ed').querySelector('[data-act="q75-psave"]'); if (b) b.click(); } if (e.key === 'Escape' && QE) { QE = null; R(); } });
+})();
+</script>
 </body>
 </html>
